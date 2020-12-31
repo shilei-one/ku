@@ -45,7 +45,7 @@ import {
   reqManageDetail,
   reqManageUpdate,
 } from "../../../utils/http";
-import { successalert } from "../../../utils/alert";
+import { successalert, erroralert } from "../../../utils/alert";
 export default {
   props: ["info", "list"],
   data() {
@@ -87,19 +87,38 @@ export default {
         status: 1,
       };
     },
+    checkProps() {
+      return new Promise((resolve, reject) => {
+        if (this.user.roleid === "") {
+          erroralert("所属角色不能为空");
+          return;
+        }
+        if (this.user.username === "") {
+          erroralert("用户名称不能为空");
+          return;
+        }
+        if (this.user.password == "") {
+          erroralert("密码不能为空");
+          return;
+        }
+        resolve();
+      });
+    },
     //4.添加
     add() {
-      reqManageAdd(this.user).then((res) => {
-        if (res.data.code == 200) {
-          // 封装了成功弹框
-          successalert(res.data.msg);
-          //弹框消失
-          this.cancel();
-          //5.清空user
-          this.empty();
-          //25.列表刷新
-          this.$emit("init");
-        }
+      this.checkProps().then(() => {
+        reqManageAdd(this.user).then((res) => {
+          if (res.data.code == 200) {
+            // 封装了成功弹框
+            successalert(res.data.msg);
+            //弹框消失
+            this.cancel();
+            //5.清空user
+            this.empty();
+            //25.列表刷新
+            this.$emit("init");
+          }
+        });
       });
     },
     //10.获取详情
@@ -114,17 +133,19 @@ export default {
     },
     //40修改
     update() {
-      reqManageUpdate(this.user).then((res) => {
-        if (res.data.code == 200) {
-          //弹成功
-          successalert(res.data.msg);
-          //弹框消失
-          this.cancel();
-          //数据清空
-          this.empty();
-          //刷新list
-          this.$emit("init");
-        }
+      this.checkProps().then(() => {
+        reqManageUpdate(this.user).then((res) => {
+          if (res.data.code == 200) {
+            //弹成功
+            successalert(res.data.msg);
+            //弹框消失
+            this.cancel();
+            //数据清空
+            this.empty();
+            //刷新list
+            this.$emit("init");
+          }
+        });
       });
     },
   },

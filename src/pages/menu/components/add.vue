@@ -1,7 +1,6 @@
 <template>
   <div>
     <el-dialog :title="info.isadd?'添加菜单':'编辑菜单'" :visible.sync="info.isshow" @closed="cancel">
-
       <el-form :model="user">
         <el-form-item label="菜单名称" label-width="100px">
           <el-input v-model="user.title" autocomplete="off"></el-input>
@@ -51,8 +50,8 @@
 
 <script>
 import { indexRoutes } from "../../../router";
-import { reqMenuAdd,reqMenuDetail,reqMenuUpdate } from "../../../utils/http";
-import { successalert } from "../../../utils/alert";
+import { reqMenuAdd, reqMenuDetail, reqMenuUpdate } from "../../../utils/http";
+import { successalert, erroralert } from "../../../utils/alert";
 export default {
   props: ["info", "list"],
   data() {
@@ -78,8 +77,8 @@ export default {
   },
   methods: {
     cancel() {
-       if(!this.info.isadd){
-        this.empty()
+      if (!this.info.isadd) {
+        this.empty();
       }
       this.info.isshow = false;
     },
@@ -94,53 +93,70 @@ export default {
         status: 1,
       };
     },
-    // 点了添加
-    add(){
-      reqMenuAdd(this.user).then((res) => {
-
-        if (res.data.code == 200) {
-          // 封装了成功弹框
-          successalert(res.data.msg);
-          // 弹框消失
-          this.cancel();
-          // 清空user
-          this.empty();
-          //列表刷新
-           this.$emit("init")
+    checkProps() {
+      return new Promise((resolve, reject) => {
+        if (this.user.title === "") {
+          erroralert("菜单名称不能为空");
+          return;
         }
+        if (!this.user.pid == 0) {
+          if (this.user.url == "") {
+            erroralert("菜单地址不能为空");
+            return;
+          }
+          return;
+        }
+        resolve();
+      });
+    },
+    // 点了添加
+    add() {
+      this.checkProps().then(() => {
+        reqMenuAdd(this.user).then((res) => {
+          if (res.data.code == 200) {
+            // 封装了成功弹框
+            successalert(res.data.msg);
+            // 弹框消失
+            this.cancel();
+            // 清空user
+            this.empty();
+            //列表刷新
+            this.$emit("init");
+          }
+        });
       });
     },
     // 修改顶级菜单
-    changePid(){
-      if(this.user.pid==0){
-        this.user.type = 1
-      }else{
-        this.user.type = 2
+    changePid() {
+      if (this.user.pid == 0) {
+        this.user.type = 1;
+      } else {
+        this.user.type = 2;
       }
     },
     // 获取详情
-    getOne(id){
-      reqMenuDetail({id:id}).then(res=>{
-        if(res.data.code==200){
-          this.user=res.data.list
+    getOne(id) {
+      reqMenuDetail({ id: id }).then((res) => {
+        if (res.data.code == 200) {
+          this.user = res.data.list;
           //补id
-          this.user.id=id;
+          this.user.id = id;
         }
-      })
+      });
     },
     // 修改
-    update(){
-      reqMenuUpdate(this.user).then(res=>{
-          if(res.data.code==200){
-            successalert(res.data.msg)
-            this.cancel()
-            this.empty()
-            this.$emit("init")
+    update() {
+      this.checkProps().then(() => {
+        reqMenuUpdate(this.user).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            this.cancel();
+            this.empty();
+            this.$emit("init");
           }
-      })
-    }
-   
-
+        });
+      });
+    },
   },
 };
 </script>

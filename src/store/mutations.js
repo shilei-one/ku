@@ -11,7 +11,7 @@ export let mutations={
         state.userInfo=obj
         //同步到本地存储
         if(obj.username){
-            sessionStorage.getItem('userInfo',JSON.stringify(obj))
+            sessionStorage.setItem('userInfo',JSON.stringify(obj))
         }else{
             sessionStorage.removeItem('userInfo')
         }

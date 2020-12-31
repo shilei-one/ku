@@ -78,7 +78,6 @@ export default {
       },
     };
   },
-  mounted() {},
   methods: {
     ...mapActions({
       reqList: "cate/reqList",
@@ -108,7 +107,6 @@ export default {
       //赋值给user.img
       this.user.img = file;
     },
-
     //ui上传文件
     changeImg2(e) {
       let file = e.raw;
@@ -116,7 +114,6 @@ export default {
       this.imgUrl = URL.createObjectURL(file);
       this.user.img = file;
     },
-
     //6.点了取消
     cancel() {
       //45.编辑清空数据
@@ -136,19 +133,38 @@ export default {
         status: 1,
       };
     },
+    checkProps() {
+      return new Promise((resolve, reject) => {
+        if (this.user.pid === "") {
+          erroralert("上级分类不能为空");
+          return;
+        }
+        if (this.user.catename === "") {
+          erroralert("分类名称不能为空");
+          return;
+        }
+        if (!this.user.img) {
+          erroralert("请上传图片");
+          return;
+        }
+        resolve();
+      });
+    },
     //4.添加
     add() {
-      reqcateAdd(this.user).then((res) => {
-        if (res.data.code == 200) {
-          // 封装了成功弹框
-          successalert(res.data.msg);
-          //弹框消失
-          this.cancel();
-          //5.清空user
-          this.empty();
-          //25.列表刷新
-          this.reqList();
-        }
+      this.checkProps().then(() => {
+        reqcateAdd(this.user).then((res) => {
+          if (res.data.code == 200) {
+            // 封装了成功弹框
+            successalert(res.data.msg);
+            //弹框消失
+            this.cancel();
+            //5.清空user
+            this.empty();
+            //25.列表刷新
+            this.reqList();
+          }
+        });
       });
     },
 
@@ -166,17 +182,19 @@ export default {
     },
     //40修改
     update() {
-      reqcateUpdate(this.user).then((res) => {
-        if (res.data.code == 200) {
-          //弹成功
-          successalert(res.data.msg);
-          //弹框消失
-          this.cancel();
-          //数据清空
-          this.empty();
-          //刷新list
-          this.reqList();
-        }
+      this.checkProps().then(() => {
+        reqcateUpdate(this.user).then((res) => {
+          if (res.data.code == 200) {
+            //弹成功
+            successalert(res.data.msg);
+            //弹框消失
+            this.cancel();
+            //数据清空
+            this.empty();
+            //刷新list
+            this.reqList();
+          }
+        });
       });
     },
   },
@@ -219,7 +237,6 @@ export default {
   top: 0;
 }
 
-// 穿透
 /* element-ui的样式 */
 .form >>>.el-upload {
   border: 1px dashed #d9d9d9;

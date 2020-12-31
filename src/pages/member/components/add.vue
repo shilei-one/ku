@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import { successalert } from "../../../utils/alert";
+import { successalert,erroralert } from "../../../utils/alert";
 import { reqmemberDetail, reqmemberUpdate,  } from "../../../utils/http";
 export default {
   props: ["info", "list"],

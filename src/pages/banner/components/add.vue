@@ -36,7 +36,11 @@
 </template>
 
 <script>
-import { reqbannerAdd, reqbannerDetail, reqbannerUpdate } from "../../../utils/http";
+import {
+  reqbannerAdd,
+  reqbannerDetail,
+  reqbannerUpdate,
+} from "../../../utils/http";
 import { successalert, erroralert } from "../../../utils/alert";
 import { mapActions, mapGetters } from "vuex";
 export default {
@@ -109,25 +113,39 @@ export default {
       this.imgUrl = "";
       //3.初始化user
       this.user = {
-       
         title: "",
         img: null,
         status: 1,
       };
     },
+    checkProps() {
+      return new Promise((resolve, reject) => {
+        if (this.user.title === "") {
+          erroralert("活动名称不能为空");
+          return;
+        }
+        if (!this.user.img) {
+          erroralert("请上传图片");
+          return;
+        }
+        resolve();
+      });
+    },
     //4.添加
     add() {
-      reqbannerAdd(this.user).then((res) => {
-        if (res.data.code == 200) {
-          // 封装了成功弹框
-          successalert(res.data.msg);
-          //弹框消失
-          this.cancel();
-          //5.清空user
-          this.empty();
-          //25.列表刷新
-          this.reqList();
-        }
+      this.checkProps().then(() => {
+        reqbannerAdd(this.user).then((res) => {
+          if (res.data.code == 200) {
+            // 封装了成功弹框
+            successalert(res.data.msg);
+            //弹框消失
+            this.cancel();
+            //5.清空user
+            this.empty();
+            //25.列表刷新
+            this.reqList();
+          }
+        });
       });
     },
 
@@ -145,17 +163,19 @@ export default {
     },
     //40修改
     update() {
-      reqbannerUpdate(this.user).then((res) => {
-        if (res.data.code == 200) {
-          //弹成功
-          successalert(res.data.msg);
-          //弹框消失
-          this.cancel();
-          //数据清空
-          this.empty();
-          //刷新list
-          this.reqList();
-        }
+      this.checkProps().then(() => {
+        reqbannerUpdate(this.user).then((res) => {
+          if (res.data.code == 200) {
+            //弹成功
+            successalert(res.data.msg);
+            //弹框消失
+            this.cancel();
+            //数据清空
+            this.empty();
+            //刷新list
+            this.reqList();
+          }
+        });
       });
     },
   },
@@ -198,7 +218,6 @@ export default {
   top: 0;
 }
 
-// 穿透
 /* element-ui的样式 */
 .form >>>.el-upload {
   border: 1px dashed #d9d9d9;

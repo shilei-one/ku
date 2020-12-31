@@ -255,15 +255,12 @@ export default {
       this.checkProps().then(() => {
         //取出富文本编辑器的内容，赋值给user
         this.user.description = this.editor.txt.html();
-
         // 由于后端要的specsattr是数组字符串，前端需要是数组，所以要拷贝、处理一下，再发送；
         // 但是由于有对象（img）,所以不能使用JSON.parse(JSON.stringify())拷贝，需要使用...
-
         let data = {
           ...this.user,
           specsattr: JSON.stringify(this.user.specsattr),
         };
-
         //发请求
         reqgoodsAdd(data).then((res) => {
           if (res.data.code == 200) {

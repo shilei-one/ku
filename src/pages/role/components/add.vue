@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { successalert } from "../../../utils/alert";
+import { successalert ,erroralert} from "../../../utils/alert";
 import { indexRoutes } from "../../../router/index";
 import {
   reqRoleadd,
@@ -108,6 +108,15 @@ export default {
         if (res.data.code == 200) {
           //弹成功
           successalert(res.data.msg);
+
+         //如果修改的角色，是当前用户所属的角色，就需要退出登录，重新登录
+          if (this.user.id == this.userInfo.roleid) {
+            this.changeUser({});
+            this.$router.push("/login");
+            console.log(this.userInfo.roleid);
+            return;
+          }
+
           //弹框消失
           this.cancel();
           //数据清空

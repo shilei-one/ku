@@ -1,7 +1,6 @@
 <template>
   <div>
     <!-- 24.遍历list -->
-    <!-- :tree-props="{children:'哪个字段用来判断有下一层'}" -->
     <el-table
       :data="list"
       style="width: 100%;margin-bottom: 20px;"
@@ -58,6 +57,7 @@ export default {
   },
   mounted() {
     this.reqList();
+    
   },
 };
 </script>

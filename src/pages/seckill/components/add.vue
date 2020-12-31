@@ -4,6 +4,7 @@
     <el-dialog :title="info.isadd?'添加活动':'编辑活动'" :visible.sync="info.isshow" @closed="cancel">
       <!-- 14.数据绑定到页面 -->
       <div>user:{{user}}</div>
+      <div>time:{{time}}</div>
       <el-form :model="user">
         <el-form-item label="活动名称" label-width="100px">
           <el-input v-model="user.title" autocomplete="off"></el-input>
@@ -11,9 +12,8 @@
         <el-form-item label="活动期限" label-width="100px">
           <div class="block">
             <el-date-picker
-              v-model="user"
+              v-model="time"
               type="datetimerange"
-              :picker-options="pickerOptions"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
@@ -34,7 +34,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="二级分类" label-width="100px">
-          <el-select v-model="user.second_cateid">
+          <el-select v-model="user.second_cateid" @change="changeSecondCateId">
             <el-option label="--请选择--" value disabled></el-option>
             <el-option
               v-for="item in secondCateList"
@@ -44,12 +44,15 @@
             ></el-option>
           </el-select>
         </el-form-item>
-
-        <el-form-item label="商品分类" label-width="100px">
+        <el-form-item label="商品" label-width="100px">
           <el-select v-model="user.goodsid">
             <el-option value label="--请选择--" disabled></el-option>
-            <!-- 少一个遍历 -->
-
+            <el-option
+              v-for="item in goodsCateList"
+              :key="item.id"
+              :label="item.goodsname"
+              :value="item.id"
+            ></el-option>
           </el-select>
         </el-form-item>
 
@@ -73,6 +76,7 @@ import {
   reqseckAdd,
   reqseckDetail,
   reqseckUpdate,
+  reqgoodslist,
 } from "../../../utils/http";
 import { successalert, erroralert } from "../../../utils/alert";
 import { mapActions, mapGetters } from "vuex";
@@ -91,10 +95,12 @@ export default {
         goodsid: "",
         status: 1,
       },
-      pickerOptions: {},
+      time: "",
 
       //二级分类的列表
       secondCateList: [],
+      //商品列表
+      goodsCateList: [],
     };
   },
 
@@ -109,7 +115,6 @@ export default {
     ...mapActions({
       //分类列表的获取
       reqCateList: "cate/reqList",
-
       reqList: "seckill/reqList",
     }),
     //修改了一级分类
@@ -121,9 +126,23 @@ export default {
     //根据一级分类，计算出二级分类的list
     getSecondList() {
       reqcatelist({ pid: this.user.first_cateid }).then((res) => {
-        console.log(res);
         if (res.data.code == 200) {
           this.secondCateList = res.data.list;
+        }
+      });
+    },
+    // 修改二级分类
+    changeSecondCateId() {
+      this.user.goodsid = "";
+      this.getGoodsList();
+    },
+    getGoodsList() {
+      reqgoodslist({
+        pid: this.user.first_cateid,
+        sid: this.user.second_cateid,
+      }).then((res) => {
+        if (res.data.code == 200) {
+          this.goodsCateList = res.data.list;
         }
       });
     },
@@ -138,7 +157,7 @@ export default {
     },
     //清空user
     empty() {
-      this.user = {
+      (this.user = {
         title: "",
         begintime: "",
         endtime: "",
@@ -146,15 +165,17 @@ export default {
         second_cateid: "",
         goodsid: "",
         status: 1,
-      };
+      }),
+        (this.time = "");
     },
     //4.添加
     add() {
       reqseckAdd(this.user).then((res) => {
+        this.user.begintime = JSON.stringify(this.time[0]);
+        this.user.endtime = JSON.stringify(this.time[1]);
         if (res.data.code == 200) {
           // 封装了成功弹框
           successalert(res.data.msg);
-          //弹框消失
           this.cancel();
           //5.清空user
           this.empty();
@@ -195,6 +216,7 @@ export default {
     if (this.cateList.length === 0) {
       this.reqCateList();
     }
+    this.getGoodsList();
   },
 };
 </script>

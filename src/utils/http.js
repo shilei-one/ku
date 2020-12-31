@@ -473,7 +473,6 @@ export let reqseckAdd = (user) => {
 export let reqsecklist = () => {
     return axios({
         url: baseUrl + "/api/secklist",
-        method: "get"
     })
 }
 
